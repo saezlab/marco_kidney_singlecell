@@ -1,0 +1,8 @@
+.DS_Store
+cache/**
+data/aat1699_DataS1/**
+data/aat1699_datas1.gz.zip
+support/aat1699-young-tabless1-s12-revision2.xlsx
+scripts/cache/**
+write/**
+scripts/.ipynb_checkpoints/**
