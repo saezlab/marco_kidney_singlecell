@@ -197,7 +197,7 @@ sc.tl.pca(adata, svd_solver='arpack')
     computing PCA
         on highly variable genes
         with n_comps=50
-        finished (0:00:05)
+        finished (0:00:04)
 
 
 
@@ -241,7 +241,7 @@ sc.tl.umap(adata)
 
     computing UMAP
         finished: added
-        'X_umap', UMAP coordinates (adata.obsm) (0:00:26)
+        'X_umap', UMAP coordinates (adata.obsm) (0:00:25)
 
 
 
@@ -313,7 +313,7 @@ adata.obs = adata.obs.merge(meta, left_index=True, right_index=True)
 
 
 ```python
-adata_filtered = adata[np.isin(adata.obs.Compartment, ['Normal_Epithelium_and_Vascular_without_PT','Tumour_Epithelium_and_Vascular','Normal_Proximal_Tubules','Normal_Immune','Tumour_Immune']) & ["RCC" in i for i in list(adata.obs.Source)]].raw.to_adata()
+adata_filtered = adata[np.isin(adata.obs.Compartment, ['Normal_Epithelium_and_Vascular_without_PT','Tumour_Epithelium_and_Vascular','Normal_Proximal_Tubules','Normal_Immune','Tumour_Immune']) & ["RCC" in i for i in list(adata.obs.Source)] & ["pRCC" not in i for i in list(adata.obs.Source)]].raw.to_adata()
 
 ```
 
@@ -325,7 +325,7 @@ adata_filtered
 
 
 
-    AnnData object with n_obs × n_vars = 17960 × 27260
+    AnnData object with n_obs × n_vars = 16076 × 27260
         obs: 'n_genes', 'n_genes_by_counts', 'total_counts', 'total_counts_mt', 'pct_counts_mt', 'barcode', 'SangerID', 'ClusterID', 'Compartment', 'nUMI', 'nGenes', 'MTfrac', 'QCpass', 'Source'
         var: 'gene_ids', 'n_cells', 'mt', 'n_cells_by_counts', 'mean_counts', 'pct_dropout_by_counts', 'total_counts', 'highly_variable', 'means', 'dispersions', 'dispersions_norm'
         uns: 'log1p', 'hvg', 'pca', 'neighbors', 'umap'
@@ -396,7 +396,7 @@ sc.tl.umap(adata_filtered)
 
     computing UMAP
         finished: added
-        'X_umap', UMAP coordinates (adata.obsm) (0:00:14)
+        'X_umap', UMAP coordinates (adata.obsm) (0:00:12)
 
 
 
@@ -421,3 +421,188 @@ sc.pl.umap(adata_filtered, color=['VIM','FN1'], size=200)
 ![png](output_45_0.png)
     
 
+
+
+```python
+list(adata_filtered.obs.Source.unique())
+```
+
+
+
+
+    ['RCC3_Kid_N_ldc_1_1',
+     'RCC3_Kid_N_ldc_1_2',
+     'RCC3_Kid_N_ldc_2_1',
+     'RCC3_Kid_T_ldc_1_2',
+     'RCC3_Kid_T_ldc_1_3',
+     'RCC3_Kid_T_ldc_1_4',
+     'RCC3_Ure_N_ldc_1_1',
+     'RCC2_Kid_N_ldc_1_1',
+     'RCC2_Kid_N_ldc_1_2',
+     'RCC2_Kid_N_ldc_1_3',
+     'RCC2_Kid_T_ldc_1_1',
+     'RCC2_Kid_T_ldc_1_2',
+     'RCC2_Kid_T_ldc_2_1',
+     'RCC2_Kid_T_ldc_2_2',
+     'RCC1_Kid_N_ldc_1_1',
+     'RCC1_Kid_N_ldc_1_2',
+     'RCC1_Kid_N_ldc_2_1',
+     'RCC1_Kid_T_ldc_1_1',
+     'RCC1_Kid_T_ldc_1_2',
+     'RCC1_Kid_T_ldc_2_1',
+     'RCC1_Kid_T_ldc_2_2',
+     'RCC1_Ure_N_ldc_1_1']
+
+
+
+
+```python
+patient = "RCC1"
+adata_filtered_patient = adata[np.isin(adata.obs.Compartment, ['Normal_Epithelium_and_Vascular_without_PT','Tumour_Epithelium_and_Vascular','Normal_Proximal_Tubules','Normal_Immune','Tumour_Immune']) & [patient in i for i in list(adata.obs.Source)]].raw.to_adata()
+sc.pp.highly_variable_genes(adata_filtered_patient)
+adata_filtered_patient.raw = adata_filtered_patient
+adata_filtered_patient = adata_filtered_patient[:, adata_filtered_patient.var.highly_variable]
+sc.pp.scale(adata_filtered_patient, max_value=10)
+sc.tl.pca(adata_filtered_patient, svd_solver='arpack')
+sc.pp.neighbors(adata_filtered_patient, n_neighbors=10, n_pcs=40)
+sc.tl.umap(adata_filtered_patient)
+sc.set_figure_params(figsize=(15,15))
+sc.pl.umap(adata_filtered_patient, color=['Compartment', 'ASS1','EPAS1'], size=200)
+```
+
+    extracting highly variable genes
+        finished (0:00:00)
+    --> added
+        'highly_variable', boolean vector (adata.var)
+        'means', float vector (adata.var)
+        'dispersions', float vector (adata.var)
+        'dispersions_norm', float vector (adata.var)
+    ... as `zero_center=True`, sparse input is densified and may lead to large memory consumption
+    computing PCA
+        on highly variable genes
+        with n_comps=50
+
+
+    /Users/aureliendugourd/opt/anaconda3/envs/sc/lib/python3.9/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
+      view_to_actual(adata)
+
+
+        finished (0:00:00)
+    computing neighbors
+        using 'X_pca' with n_pcs = 40
+        finished: added to `.uns['neighbors']`
+        `.obsp['distances']`, distances for each pair of neighbors
+        `.obsp['connectivities']`, weighted adjacency matrix (0:00:00)
+    computing UMAP
+        finished: added
+        'X_umap', UMAP coordinates (adata.obsm) (0:00:04)
+
+
+
+    
+![png](output_47_3.png)
+    
+
+
+
+```python
+patient = "RCC2"
+adata_filtered_patient = adata[np.isin(adata.obs.Compartment, ['Normal_Epithelium_and_Vascular_without_PT','Tumour_Epithelium_and_Vascular','Normal_Proximal_Tubules','Normal_Immune','Tumour_Immune']) & [patient in i for i in list(adata.obs.Source)]].raw.to_adata()
+sc.pp.highly_variable_genes(adata_filtered_patient)
+adata_filtered_patient.raw = adata_filtered_patient
+adata_filtered_patient = adata_filtered_patient[:, adata_filtered_patient.var.highly_variable]
+sc.pp.scale(adata_filtered_patient, max_value=10)
+sc.tl.pca(adata_filtered_patient, svd_solver='arpack')
+sc.pp.neighbors(adata_filtered_patient, n_neighbors=10, n_pcs=40)
+sc.tl.umap(adata_filtered_patient)
+sc.set_figure_params(figsize=(15,15))
+sc.pl.umap(adata_filtered_patient, color=['Compartment', 'ASS1','EPAS1'], size=200)
+```
+
+    extracting highly variable genes
+        finished (0:00:00)
+    --> added
+        'highly_variable', boolean vector (adata.var)
+        'means', float vector (adata.var)
+        'dispersions', float vector (adata.var)
+        'dispersions_norm', float vector (adata.var)
+    ... as `zero_center=True`, sparse input is densified and may lead to large memory consumption
+
+
+    /Users/aureliendugourd/opt/anaconda3/envs/sc/lib/python3.9/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
+      view_to_actual(adata)
+
+
+    computing PCA
+        on highly variable genes
+        with n_comps=50
+        finished (0:00:02)
+    computing neighbors
+        using 'X_pca' with n_pcs = 40
+        finished: added to `.uns['neighbors']`
+        `.obsp['distances']`, distances for each pair of neighbors
+        `.obsp['connectivities']`, weighted adjacency matrix (0:00:00)
+    computing UMAP
+        finished: added
+        'X_umap', UMAP coordinates (adata.obsm) (0:00:07)
+
+
+
+    
+![png](output_48_3.png)
+    
+
+
+
+```python
+patient = "RCC3"
+adata_filtered_patient = adata[np.isin(adata.obs.Compartment, ['Normal_Epithelium_and_Vascular_without_PT','Tumour_Epithelium_and_Vascular','Normal_Proximal_Tubules','Normal_Immune','Tumour_Immune']) & [patient in i for i in list(adata.obs.Source)]].raw.to_adata()
+sc.pp.highly_variable_genes(adata_filtered_patient)
+adata_filtered_patient.raw = adata_filtered_patient
+adata_filtered_patient = adata_filtered_patient[:, adata_filtered_patient.var.highly_variable]
+sc.pp.scale(adata_filtered_patient, max_value=10)
+sc.tl.pca(adata_filtered_patient, svd_solver='arpack')
+sc.pp.neighbors(adata_filtered_patient, n_neighbors=10, n_pcs=40)
+sc.tl.umap(adata_filtered_patient)
+sc.set_figure_params(figsize=(15,15))
+sc.pl.umap(adata_filtered_patient, color=['Compartment', 'ASS1','EPAS1'], size=200)
+```
+
+    extracting highly variable genes
+        finished (0:00:00)
+    --> added
+        'highly_variable', boolean vector (adata.var)
+        'means', float vector (adata.var)
+        'dispersions', float vector (adata.var)
+        'dispersions_norm', float vector (adata.var)
+    ... as `zero_center=True`, sparse input is densified and may lead to large memory consumption
+    computing PCA
+        on highly variable genes
+        with n_comps=50
+
+
+    /Users/aureliendugourd/opt/anaconda3/envs/sc/lib/python3.9/site-packages/scanpy/preprocessing/_simple.py:843: UserWarning: Received a view of an AnnData. Making a copy.
+      view_to_actual(adata)
+
+
+        finished (0:00:00)
+    computing neighbors
+        using 'X_pca' with n_pcs = 40
+        finished: added to `.uns['neighbors']`
+        `.obsp['distances']`, distances for each pair of neighbors
+        `.obsp['connectivities']`, weighted adjacency matrix (0:00:00)
+    computing UMAP
+        finished: added
+        'X_umap', UMAP coordinates (adata.obsm) (0:00:02)
+
+
+
+    
+![png](output_49_3.png)
+    
+
+
+
+```python
+
+```
